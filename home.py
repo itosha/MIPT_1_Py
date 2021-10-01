@@ -30,7 +30,7 @@ def tree(radius, a, h):
     Surf.blit(round([0, 105, 0], radius), (x / 2 - 2*radius, 3.2*radius))
     return (Surf)
 
-"""облако с задоным радиусом отдельного подоблочка"""
+"""облако с заданным радиусом отдельного подоблочка"""
 def clouds(radius):
     Surf = pygame.Surface((6*radius, 4*radius), pygame.SRCALPHA)
     Surf.blit(round([255, 255, 255], radius), (radius, 2*radius))
