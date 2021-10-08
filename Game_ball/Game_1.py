@@ -51,11 +51,11 @@ def traffic(ball):
 
 def Click(X, Y, circles):
     """
-
-    :param X:
-    :param Y:
-    :param circles:
-    :return:
+    детектирует попадание в шар
+    :param X: координаты мыши по Х
+    :param Y: координаты мыши по У
+    :param circles: список описывающий исследуемый шар (координаты центра, радиус, скорость, угол движения)
+    :return: True или False в зависимости от того попал ли пользователь или нет
     """
     T = (X - circles[0]) ** 2 + (Y - circles[1]) ** 2
     if T <= circles[2] ** 2:
