@@ -17,6 +17,18 @@ BLACK = (0, 0, 0)
 COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 Points = 0
 
+def new_trigon():
+    x = randint(100, 1100)
+    y = randint(100, 900)
+    r = randint(10, 100)
+    v = randint(10, 30)
+    angle = randint(0, 360)
+    color = COLORS[randint(0, 5)]
+    p1 = (x - r * math.cos(math.radians(30)), y + r * math.sin(math.radians(30)))
+    p2 = (x + r * math.cos(math.radians(30)), y + r * math.sin(math.radians(30)))
+    polygon(screen, color, ((x, y - r), p1, p2, (x, y - r)))
+    return [x, y, r, v, angle]
+
 
 def new_ball():
     """
@@ -69,7 +81,7 @@ clock = pygame.time.Clock()
 finished = False
 
 ball = []
-triger = False
+triger_ball = False
 
 while not finished:
     clock.tick(FPS)
@@ -81,15 +93,15 @@ while not finished:
                 if Click(event.pos[0], event.pos[1], ball[i]):
                     print("WoW!")
                     delet = i
-                    triger = True
+                    triger_ball = True
                     Points += 1
 
-    if triger:
+    if triger_ball:
         ball.pop(delet)
-        triger = False
+        triger_ball = False
     for i in range(len(ball)):
         ball[i] = traffic(ball[i])
-    if len(ball) < 5:
+    if len(ball) < 3:
         ball = [0] + ball
         ball[0] = new_ball()
     pygame.display.update()
