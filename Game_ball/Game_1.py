@@ -1,9 +1,10 @@
 import pygame
+import math
 from pygame.draw import *
 from random import randint
 pygame.init()
 
-FPS = 1
+FPS = 30
 screen = pygame.display.set_mode((1200, 900))
 
 RED = (255, 0, 0)
@@ -21,9 +22,21 @@ def new_ball():
     x = randint(100, 1100)
     y = randint(100, 900)
     r = randint(10, 100)
+    v = randint(10, 50)
+    angle = randint(0, 360)
     color = COLORS[randint(0, 5)]
     circle(screen, color, (x, y), r)
-    return [x, y, r, color]
+    return [x, y, r, color, v, angle]
+
+def traffic(ball):
+    ball[0] = ball[0] + ball[4] * math.cos(math.radians(ball[5]))
+    ball[1] = ball[1] + ball[4] * math.sin(math.radians(ball[5]))
+    if (ball[0] <= 0) or (ball[0] >= 1200):
+        ball[5] = 180 - ball[5]
+    elif (ball[1] <= 0) or (ball[1] >= 900):
+        ball[5] = -ball[5]
+    circle(screen, ball[3], (ball[0], ball[1]), ball[2])
+    return ball
 
 def Click(X, Y, circles):
     T = (X - circles[0]) ** 2 + (Y - circles[1]) ** 2
@@ -50,7 +63,7 @@ while not finished:
                     Points += 1
 
     for i in range(len(ball)):
-        ball[i] = new_ball()
+        ball[i] = traffic(ball[i])
     if len(ball) < 5:
         ball = [0] + ball
         ball[0] = new_ball()
