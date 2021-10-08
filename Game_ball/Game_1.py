@@ -26,7 +26,7 @@ def new_ball():
     x = randint(100, 1100)
     y = randint(100, 900)
     r = randint(10, 100)
-    v = randint(10, 50)
+    v = randint(10, 30)
     angle = randint(0, 360)
     color = COLORS[randint(0, 5)]
     circle(screen, color, (x, y), r)
