@@ -22,6 +22,14 @@ def new_ball():
     r = randint(10, 100)
     color = COLORS[randint(0, 5)]
     circle(screen, color, (x, y), r)
+    return [x, y, r]
+
+def Click(X, Y, circles):
+    T = (X - circles[0]) ** 2 + (Y - circles[1]) ** 2
+    if T <= circles[2] ** 2:
+        return True
+    else:
+        return False
 
 pygame.display.update()
 clock = pygame.time.Clock()
@@ -32,8 +40,14 @@ while not finished:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             finished = True
-
-    new_ball()
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            print(event.pos)
+            print(circles)
+            if Click(event.pos[0], event.pos[1], circles):
+                print("WoW!")
+            else:
+                print("мимо")
+    circles = new_ball()
     pygame.display.update()
     screen.fill(BLACK)
 
