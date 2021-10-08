@@ -19,7 +19,10 @@ Points = 0
 
 
 def new_ball():
-    '''рисует новый шарик '''
+    """
+    создает новый шарик и возврашает список описывающий его
+    :return: список из координаты центра, радиус, скорость, угол движения
+    """
     x = randint(100, 1100)
     y = randint(100, 900)
     r = randint(10, 100)
@@ -31,6 +34,11 @@ def new_ball():
 
 
 def traffic(ball):
+    """
+
+    :param ball:
+    :return:
+    """
     ball[0] = ball[0] + ball[4] * math.cos(math.radians(ball[5]))
     ball[1] = ball[1] + ball[4] * math.sin(math.radians(ball[5]))
     if (ball[0] <= 0) or (ball[0] >= 1200):
@@ -42,6 +50,13 @@ def traffic(ball):
 
 
 def Click(X, Y, circles):
+    """
+
+    :param X:
+    :param Y:
+    :param circles:
+    :return:
+    """
     T = (X - circles[0]) ** 2 + (Y - circles[1]) ** 2
     if T <= circles[2] ** 2:
         return True
