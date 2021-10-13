@@ -20,14 +20,15 @@ Points = 0
 def new_square():
     x = randint(100, 1100)
     y = randint(100, 900)
-    a = randint(10, 100)
+    a = randint(10, 50)
     v = randint(10, 30)
     tap = randint(1, 5)
     angle = randint(0, 360)
+    d_angle = randint(20, 70)
     color = COLORS[randint(0, 5)]
-
+    points = tap * (a // 5)
     rect(screen, color, (x - a / 2, y - a / 2, a, a))
-    return [x, y, a, v, angle]
+    return [x, y, a, color, v, angle, points, d_angle, tap]
 
 
 def new_ball():
@@ -82,6 +83,7 @@ clock = pygame.time.Clock()
 finished = False
 
 ball = []
+square = []
 trigger_ball = False
 
 while not finished:
