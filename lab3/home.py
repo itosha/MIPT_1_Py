@@ -62,6 +62,7 @@ screen.blit(tree(20, 10, 80), (300, 350))
 screen.blit(clouds(20), (200, 100))
 screen.blit(clouds(20), (300, 80))
 screen.blit(clouds(20), (400, 120))
+screen.blit(clouds(20), (300, 150))
 screen.blit(round([224, 112, 124], 30), (50, 50))
 
 pygame.display.update()

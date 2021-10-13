@@ -17,6 +17,7 @@ BLACK = (0, 0, 0)
 COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 Points = 0
 
+
 def new_square():
     x = randint(100, 1100)
     y = randint(100, 900)
@@ -29,6 +30,19 @@ def new_square():
     points = tap * (a // 5)
     rect(screen, color, (x - a / 2, y - a / 2, a, a))
     return [x, y, a, color, v, angle, points, d_angle, tap]
+
+
+def traffic_square(square):
+    square[0] = square[0] + square[4] * math.cos(math.radians(square[5]))
+    square[1] = square[1] + square[4] * math.sin(math.radians(square[5]))
+    if (square[0] <= 0) or (square[0] >= 1200):
+        square[5] = 180 - square[5]
+        square[7] = 180 - square[7]
+    elif (square[1] <= 0) or (square[1] >= 900):
+        square[5] = -square[5]
+        square[7] = -square[7]
+    rect(screen, square[3], (square[0] - square[2] / 2, square[1] - square[2] / 2, square[2], square[2]))
+    return square
 
 
 def new_ball():
@@ -104,9 +118,14 @@ while not finished:
         trigger_ball = False
     for i in range(len(ball)):
         ball[i] = traffic(ball[i])
+    for i in range(len(square)):
+        square[i] = traffic_square(square[i])
     if len(ball) < 3:
         ball = [0] + ball
         ball[0] = new_ball()
+    if len(square) < 3:
+        square = [0] + square
+        square[0] = new_square()
     pygame.display.update()
     screen.fill(BLACK)
 
