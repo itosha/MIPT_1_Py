@@ -19,9 +19,15 @@ Points = 0
 
 
 def new_square():
+    """
+    создает новый квадрат
+    :return: возврашает список характеризующий новый квадрат
+    (координаты середины, ширина, цвет, скорость, угол, очки за попадание, угол поворота,
+    количество попаданий требуемых для получения очков)
+    """
     x = randint(100, 1100)
     y = randint(100, 900)
-    a = randint(40, 50)
+    a = randint(60, 80)
     v = randint(10, 30)
     tap = randint(1, 5)
     angle = randint(0, 360)
@@ -33,6 +39,11 @@ def new_square():
 
 
 def traffic_square(square):
+    """
+    передвигает уже существующий квадрат согласно его скорости, углу движения и поворота + изменяет угол при ударе о стенку
+    :param square: принимает список описывающий квадрат
+    :return: возврашает список подвинутого шара
+    """
     square[5] = square[5] + square[7]
     square[0] = square[0] + square[4] * math.cos(math.radians(square[5]))
     square[1] = square[1] + square[4] * math.sin(math.radians(square[5]))
@@ -51,8 +62,8 @@ def Click_square(X, Y, square):
     детектирует попадание в квадрат
     :param X: координаты мыши по Х
     :param Y: координаты мыши по У
-    :param circles: список описывающий исследуемый квадрат
-    :return: True или False в зависимости от того попал ли пользователь или нет
+    :param square: список описывающий исследуемый квадрат
+    :return: True или False в зависимости от того уничтожил ли пользователь квадрат или нет
     """
     if abs(X - square[0]) <= square[2] / 2 and abs(Y - square[1]) <= square[2] / 2:
         square[8] -= 1
