@@ -13,13 +13,16 @@ name_get = False
 
 pygame.font.init()
 myfont = pygame.font.SysFont('Comic Sans MS', 30)
-Name = "Name: "
+topic = "Name: "
+Name = ""
+Text = topic + Name
 
 pygame.display.update()
 
 while not finished and not name_get:
     clock.tick(FPS)
-    textsurface = myfont.render(Name, False, (100, 100, 0))
+    Text = topic + Name
+    textsurface = myfont.render(Text, False, (100, 100, 0))
     screen.blit(textsurface, (110, 110))
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
