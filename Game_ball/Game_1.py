@@ -117,6 +117,33 @@ ball = []
 square = []
 trigger_ball = False
 trigger_square = False
+name_get = False
+
+pygame.font.init()
+myfont = pygame.font.SysFont('Comic Sans MS', 30)
+topic = "Name: "
+Name = ""
+Text = topic + Name
+
+while not finished and not name_get:
+    clock.tick(FPS)
+    Text = topic + Name
+    textsurface = myfont.render(Text, False, (100, 100, 0))
+    screen.blit(textsurface, (110, 110))
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            finished = True
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RETURN:
+                name_get = True
+            elif event.key == pygame.K_BACKSPACE:
+                Name = Name[:-1]
+            else:
+                Name = Name + event.unicode
+
+    pygame.display.update()
+    screen.fill(BLACK)
+
 
 while not finished:
     clock.tick(FPS)
