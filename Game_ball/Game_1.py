@@ -194,4 +194,6 @@ while not finished:
 
 pygame.quit()
 
-print(Points)
+with open("Tries.txt", 'a') as f:
+    f.write(Name + ": " + str(Points))
+    f.write("\n")
