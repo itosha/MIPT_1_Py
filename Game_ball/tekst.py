@@ -14,8 +14,6 @@ name_get = False
 pygame.font.init()
 myfont = pygame.font.SysFont('Comic Sans MS', 30)
 Name = "Name: "
-textsurface = myfont.render(Name, False, (100, 100, 0))
-screen.blit(textsurface, (110, 110))
 
 pygame.display.update()
 
@@ -29,6 +27,8 @@ while not finished and not name_get:
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
                 name_get = True
+            elif event.key == pygame.K_BACKSPACE:
+                Name = Name[:-1]
             else:
                 Name = Name + event.unicode
 
