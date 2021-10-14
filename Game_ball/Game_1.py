@@ -21,11 +21,11 @@ Points = 0
 def new_square():
     x = randint(100, 1100)
     y = randint(100, 900)
-    a = randint(10, 50)
+    a = randint(40, 50)
     v = randint(10, 30)
     tap = randint(1, 5)
     angle = randint(0, 360)
-    d_angle = randint(20, 70)
+    d_angle = randint(1, 5)
     color = COLORS[randint(0, 5)]
     points = tap * (a // 5)
     rect(screen, color, (x - a / 2, y - a / 2, a, a))
@@ -33,6 +33,7 @@ def new_square():
 
 
 def traffic_square(square):
+    square[5] = square[5] + square[7]
     square[0] = square[0] + square[4] * math.cos(math.radians(square[5]))
     square[1] = square[1] + square[4] * math.sin(math.radians(square[5]))
     if (square[0] <= 0) or (square[0] >= 1200):
@@ -43,6 +44,22 @@ def traffic_square(square):
         square[7] = -square[7]
     rect(screen, square[3], (square[0] - square[2] / 2, square[1] - square[2] / 2, square[2], square[2]))
     return square
+
+
+def Click_square(X, Y, square):
+    """
+    детектирует попадание в квадрат
+    :param X: координаты мыши по Х
+    :param Y: координаты мыши по У
+    :param circles: список описывающий исследуемый квадрат
+    :return: True или False в зависимости от того попал ли пользователь или нет
+    """
+    if abs(X - square[0]) <= square[2] / 2 and abs(Y - square[1]) <= square[2] / 2:
+        square[8] -= 1
+        if square[8] == 0:
+            return True
+    else:
+        return False
 
 
 def new_ball():
@@ -99,6 +116,7 @@ finished = False
 ball = []
 square = []
 trigger_ball = False
+trigger_square = False
 
 while not finished:
     clock.tick(FPS)
@@ -108,14 +126,21 @@ while not finished:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             for i in range(len(ball)):
                 if Click(event.pos[0], event.pos[1], ball[i]):
-                    print("WoW!")
                     delete = i
                     trigger_ball = True
                     Points += ball[i][6]
+            for i in range(len(square)):
+                if Click_square(event.pos[0], event.pos[1], square[i]):
+                    delete = i
+                    trigger_square = True
+                    Points += square[i][6]
 
     if trigger_ball:
         ball.pop(delete)
         trigger_ball = False
+    if trigger_square:
+        square.pop(delete)
+        trigger_square = False
     for i in range(len(ball)):
         ball[i] = traffic(ball[i])
     for i in range(len(square)):
@@ -123,7 +148,7 @@ while not finished:
     if len(ball) < 3:
         ball = [0] + ball
         ball[0] = new_ball()
-    if len(square) < 3:
+    if len(square) < 2:
         square = [0] + square
         square[0] = new_square()
     pygame.display.update()
