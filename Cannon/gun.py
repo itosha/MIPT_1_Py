@@ -54,6 +54,7 @@ class ball():
         # FIXME
         self.x += self.vx
         self.y -= self.vy
+        self.vy -= 0.96
         self.set_coords()
 
     def hittest(self, obj):
