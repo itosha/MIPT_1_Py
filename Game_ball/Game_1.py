@@ -4,7 +4,7 @@ from pygame.draw import *
 from random import randint
 pygame.init()
 
-FPS = 30
+FPS = 60
 screen = pygame.display.set_mode((1200, 900))
 
 RED = (255, 0, 0)
@@ -97,10 +97,18 @@ def traffic(ball):
     """
     ball[0] = ball[0] + ball[4] * math.cos(math.radians(ball[5]))
     ball[1] = ball[1] + ball[4] * math.sin(math.radians(ball[5]))
-    if (ball[0] <= 0) or (ball[0] >= 1200):
-        ball[5] = 180 - ball[5]
-    elif (ball[1] <= 0) or (ball[1] >= 900):
-        ball[5] = -ball[5]
+    if ball[0] <= 0:
+        ball[5] = 180 - ball[5] + randint(-30, 30)
+        ball[0] = 0
+    elif ball[0] >= 1200:
+        ball[5] = 180 - ball[5] + randint(-30, 30)
+        ball[0] = 1200
+    elif ball[1] <= 0:
+        ball[5] = -ball[5] + randint(-30, 30)
+        ball[1] = 0
+    elif ball[1] >= 900:
+        ball[5] = -ball[5] + randint(-30, 30)
+        ball[1] = 900
     circle(screen, ball[3], (ball[0], ball[1]), ball[2])
     return ball
 
