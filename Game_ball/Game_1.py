@@ -28,7 +28,7 @@ def new_square():
     x = randint(100, 1100)
     y = randint(100, 900)
     a = randint(60, 80)
-    v = randint(10, 30)
+    v = randint(5, 15)
     tap = randint(1, 5)
     angle = randint(0, 360)
     d_angle = randint(1, 5)
@@ -47,12 +47,22 @@ def traffic_square(square):
     square[5] = square[5] + square[7]
     square[0] = square[0] + square[4] * math.cos(math.radians(square[5]))
     square[1] = square[1] + square[4] * math.sin(math.radians(square[5]))
-    if (square[0] <= 0) or (square[0] >= 1200):
+    if square[0] <= 0:
         square[5] = 180 - square[5]
         square[7] = 180 - square[7]
-    elif (square[1] <= 0) or (square[1] >= 900):
+        square[0] = 0
+    elif square[0] >= 1200:
+        square[5] = 180 - square[5]
+        square[7] = 180 - square[7]
+        square[0] = 1200
+    elif square[1] <= 0:
         square[5] = -square[5]
         square[7] = -square[7]
+        square[1] = 0
+    elif square[1] >= 900:
+        square[5] = -square[5]
+        square[7] = -square[7]
+        square[1] = 900
     rect(screen, square[3], (square[0] - square[2] / 2, square[1] - square[2] / 2, square[2], square[2]))
     return square
 
@@ -82,7 +92,7 @@ def new_ball():
     y = randint(100, 900)
     r = randint(10, 100)
     points = r // 10
-    v = randint(10, 30)
+    v = randint(5, 15)
     angle = randint(0, 360)
     color = COLORS[randint(0, 5)]
     circle(screen, color, (x, y), r)
