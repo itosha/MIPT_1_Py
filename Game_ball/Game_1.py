@@ -25,9 +25,10 @@ def new_square():
     return [x, y, a, color, v, angle, points, d_angle, tap]
 
 
-def traffic_square(square):
+def traffic_square(square: list):
     """
-    передвигает уже существующий квадрат согласно его скорости, углу движения и поворота + изменяет угол при ударе о стенку
+    передвигает уже существующий квадрат согласно его скорости,
+    углу движения и поворота + изменяет угол при ударе о стенку
     :param square: принимает список описывающий квадрат
     :return: возврашает список подвинутого шара
     """
@@ -54,7 +55,7 @@ def traffic_square(square):
     return square
 
 
-def Click_square(X, Y, square):
+def click_square(X: int, Y: int, square: list):
     """
     детектирует попадание в квадрат
     :param X: координаты мыши по Х
@@ -86,7 +87,7 @@ def new_ball():
     return [x, y, r, color, v, angle, points]
 
 
-def traffic(ball):
+def traffic(ball: list):
     """
     передвигает уже существующий шарик согласно его скорости и углу движения + изменяет угол при ударе о стенку
     :param ball: принимает список описывающий шар (координаты центра, радиус, скорость, угол движения)
@@ -110,7 +111,7 @@ def traffic(ball):
     return ball
 
 
-def Click(X, Y, circles):
+def click(X: int, Y: int, circles: list):
     """
     детектирует попадание в шар
     :param X: координаты мыши по Х
@@ -181,13 +182,13 @@ while not finished:
             finished = True
         elif event.type == pygame.MOUSEBUTTONDOWN:
             for i in range(len(ball)):
-                if Click(event.pos[0], event.pos[1], ball[i]):
+                if click(event.pos[0], event.pos[1], ball[i]):
                     delete = i
                     trigger_ball = True
                     Points += ball[i][6]
             for i in range(len(square)):
-                if Click_square(event.pos[0], event.pos[1], square[i]):
-                    delete = i
+                if click_square(event.pos[0], event.pos[1], square[i]):
+                    delete_s = i
                     trigger_square = True
                     Points += square[i][6]
 
@@ -195,7 +196,7 @@ while not finished:
         ball.pop(delete)
         trigger_ball = False
     if trigger_square:
-        square.pop(delete)
+        square.pop(delete_s)
         trigger_square = False
     for i in range(len(ball)):
         ball[i] = traffic(ball[i])
