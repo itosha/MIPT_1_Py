@@ -54,7 +54,23 @@ class ball():
         # FIXME
         self.x += self.vx
         self.y -= self.vy
-        self.vy -= 0.96
+        self.vy -= 0.85
+        if self.y >= 600 - self.r and self.vy < 0:
+            self.vy *= -0.6
+            self.vx *= 0.8
+        if self.y <= self.r and self.vy > 0:
+            self.vy *= -0.6
+            self.vx *= 0.8
+        if self.x >= 800 - self.r and self.vx > 0:
+            self.vx *= -0.6
+            self.vy *= 0.8
+        if self.x <= self.r and self.vx < 0:
+            self.vx *= -0.6
+            self.vy *= 0.8
+        if abs(self.vx) < 0.85:
+            self.vx = 0
+        if abs(self.vy) < 0.85:
+            self.vy = 0
         self.set_coords()
 
     def hittest(self, obj):
