@@ -12,7 +12,7 @@ canv = tk.Canvas(root, bg='white')
 canv.pack(fill=tk.BOTH, expand=1)
 
 
-class ball():
+class ball:
     def __init__(self, x=40, y=450):
         """ Конструктор класса ball
 
@@ -20,12 +20,14 @@ class ball():
         x - начальное положение мяча по горизонтали
         y - начальное положение мяча по вертикали
         """
+        global count
+        self.name = 'ball' + str(count)
+        count += 1
         self.x = x
         self.y = y
         self.r = 10
         self.vx = 0
         self.vy = 0
-        self.give_name()
         self.color = choice(['blue', 'green', 'red', 'brown'])
         self.id = canv.create_oval(
                 self.x - self.r,
@@ -36,11 +38,6 @@ class ball():
                 tag=self.name
         )
         self.live = 30
-
-    def give_name(self):
-        global count
-        self.name = 'ball' + str(count)
-        count += 1
 
     def set_coords(self):
         canv.coords(
@@ -99,12 +96,13 @@ class ball():
         canv.delete(self.name)
 
 
-class gun():
+class gun:
     def __init__(self):
         self.f2_power = 10
         self.f2_on = 0
         self.an = 1
-        self.id = canv.create_line(20, 450, 50, 420, width=7) # FIXME: don't know how to set it...
+        self.id = canv.create_line(20, 450, 50, 420, width=7)
+        # FIXME: don't know how to set it...
 
     def fire2_start(self, event):
         self.f2_on = 1
@@ -148,7 +146,7 @@ class gun():
             canv.itemconfig(self.id, fill='black')
 
 
-class target():
+class target:
     def __init__(self):
         self.points = 0
         self.live = 1
