@@ -25,15 +25,23 @@ class ball():
         self.r = 10
         self.vx = 0
         self.vy = 0
+        self.give_name()
         self.color = choice(['blue', 'green', 'red', 'brown'])
         self.id = canv.create_oval(
                 self.x - self.r,
                 self.y - self.r,
                 self.x + self.r,
                 self.y + self.r,
-                fill=self.color
+                fill=self.color,
+                tag=self.name
         )
         self.live = 30
+        print(self.name)
+
+    def give_name(self):
+        global count
+        self.name = 'ball' + str(count)
+        count += 1
 
     def set_coords(self):
         canv.coords(
@@ -55,7 +63,7 @@ class ball():
         self.x += self.vx
         self.y -= self.vy
         self.vy -= 0.85
-        if self.y >= 600 - self.r and self.vy < 0:
+        if self.y >= 597 - self.r and self.vy < 0:
             self.vy *= -0.6
             self.vx *= 0.8
         if self.y <= self.r and self.vy > 0:
@@ -67,10 +75,10 @@ class ball():
         if self.x <= self.r and self.vx < 0:
             self.vx *= -0.6
             self.vy *= 0.8
-        if abs(self.vx) < 0.85:
+        if abs(self.vx) < 0.85 and abs(self.vy) < 0.85:
             self.vx = 0
-        if abs(self.vy) < 0.85:
             self.vy = 0
+            self.live -= 1
         self.set_coords()
 
     def hittest(self, obj):
@@ -87,6 +95,11 @@ class ball():
             return False
         else:
             return True
+
+    def distract(self):
+        print(self.name)
+        canv.delete(self.name)
+        print(1)
 
 
 class gun():
@@ -168,6 +181,7 @@ screen1 = canv.create_text(400, 300, text='', font='28')
 g1 = gun()
 bullet = 0
 balls = []
+count = 0
 
 
 def new_game(event=''):
@@ -184,6 +198,9 @@ def new_game(event=''):
     while t1.live or balls:
         for b in balls:
             b.move()
+            if b.live < 0:
+                b.distract()
+                balls.remove(b)
             if b.hittest(t1) and t1.live:
                 t1.live = 0
                 t1.hit()
