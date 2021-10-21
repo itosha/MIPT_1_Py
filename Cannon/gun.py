@@ -36,7 +36,6 @@ class ball():
                 tag=self.name
         )
         self.live = 30
-        print(self.name)
 
     def give_name(self):
         global count
@@ -97,9 +96,7 @@ class ball():
             return True
 
     def distract(self):
-        print(self.name)
         canv.delete(self.name)
-        print(1)
 
 
 class gun():
