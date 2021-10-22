@@ -184,16 +184,29 @@ screen = pygame.display.set_mode((WIDTH, HEIGHT))
 bullet = 0
 balls = []
 
+pygame.font.init()
+myfont = pygame.font.SysFont('Comic Sans MS', 20)
+topic = "Name: "
+Text = topic
+
 clock = pygame.time.Clock()
 gun = Gun(screen)
-target = Target(screen)
+target = []
+target += [Target(screen)]
 finished = False
+point = 0
 
 while not finished:
     screen.fill(WHITE)
+    Points = str(point)
+    for t in target:
+        t.draw()
+    textsurface = myfont.render(Points, False, (0, 0, 0))
+    screen.blit(textsurface, (10, 10))
     gun.draw()
-    target.draw()
     for b in balls:
+        if b.live < 0:
+            balls.remove(b)
         b.draw()
     pygame.display.update()
 
@@ -210,10 +223,13 @@ while not finished:
 
     for b in balls:
         b.move()
-        if b.hittest(target) and target.live:
-            target.live = 0
-            target.hit()
-            target.new_target()
+        for t in target:
+            if b.hittest(t) and t.live:
+                t.hit()
+                t.new_target()
+                point += t.points
+
     gun.power_up()
+
 
 pygame.quit()
