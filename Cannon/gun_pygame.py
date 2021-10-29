@@ -15,6 +15,7 @@ BLACK = (0, 0, 0)
 WHITE = 0xFFFFFF
 GREY = 0x7D7D7D
 GAME_COLORS = [RED, BLUE, YELLOW, GREEN, MAGENTA, CYAN]
+GAME_COLORS_for_ball = [BLUE, YELLOW, GREEN, MAGENTA, CYAN]
 
 WIDTH = 800
 HEIGHT = 600
@@ -34,7 +35,7 @@ class Ball:
         self.r = 10
         self.vx = 0
         self.vy = 0
-        self.color = choice(GAME_COLORS)
+        self.color = choice(GAME_COLORS_for_ball)
         self.live = 30
 
     def move(self):
@@ -44,7 +45,6 @@ class Ball:
         self.x и self.y с учетом скоростей self.vx и self.vy, силы гравитации, действующей на мяч,
         и стен по краям окна (размер окна 800х600).
         """
-        # FIXME
         self.x += self.vx
         self.y -= self.vy
         self.vy -= 0.85
@@ -81,7 +81,6 @@ class Ball:
         Returns:
             Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
         """
-        # FIXME
         distans = (self.x - obj.x) ** 2 + (self.y - obj.y) ** 2
         if distans > (self.r + obj.r) ** 2:
             return False
@@ -94,6 +93,8 @@ class Gun:
         self.screen = screen
         self.f2_power = 10
         self.f2_on = 0
+        self.x = 100
+        self.y = 450
         self.an = 1
         self.color = GREY
 
@@ -108,7 +109,7 @@ class Gun:
         """
         global balls, bullet
         bullet += 1
-        new_ball = Ball(self.screen)
+        new_ball = Ball(self.screen, self.x, self.y)
         new_ball.r += 5
         self.an = math.atan2((event.pos[1]-new_ball.y), (event.pos[0]-new_ball.x))
         new_ball.vx = self.f2_power * math.cos(self.an)
@@ -120,14 +121,22 @@ class Gun:
     def targetting(self, event):
         """Прицеливание. Зависит от положения мыши."""
         if event:
-            if event.pos[0]-20 != 0:
-                self.an = math.atan((event.pos[1]-450) / (event.pos[0]-20))
+            if event.pos[0]-self.x == 0:
+                if event.pos[1]-self.y > 0:
+                    self.an = math.radians(-90)
+                else:
+                    self.an = math.radians(90)
             else:
-                self.an = math.acos(0)
+                if event.pos[0]-self.x > 0:
+                    self.an = math.atan((event.pos[1] - self.y) / (event.pos[0] - self.x))
+                else:
+                    self.an = math.radians(180) - math.atan((-event.pos[1] + self.y) / (event.pos[0] - self.x))
         if self.f2_on:
             self.color = RED
         else:
             self.color = BLACK
+
+        #print(math.degrees(self.an))
 
     def power_up(self):
         if self.f2_on:
@@ -138,14 +147,14 @@ class Gun:
             self.color = BLACK
 
     def draw(self):
-        x = 20
-        y = 450
+        x = self.x
+        y = self.y
         l = max(self.f2_power, 20)
         h = 5
         pygame.draw.polygon(self.screen,
                             self.color,
                             ((x, y),
-                             (x + l * math.cos(-self.an), y - l * math.sin(-self.an)),
+                             (x + l * math.cos(self.an), y - l * math.sin(-self.an)),
                              (x + l * math.cos(-self.an) - h * math.sin(-self.an), y - l * math.sin(-self.an) - h * math.cos(-self.an)),
                              (x - h * math.sin(-self.an), y - h * math.cos(-self.an)),
                              (x, y)))
@@ -156,7 +165,6 @@ class Target:
         self.screen = screen
         self.points = 0
         self.live = 1
-        # FIXME: don't work!!! How to call this functions when object is created?
         self.new_target()
 
     def new_target(self):
@@ -164,7 +172,27 @@ class Target:
         x = self.x = rnd(600, 780)
         y = self.y = rnd(300, 550)
         r = self.r = rnd(2, 50)
+        self.vx = 0
+        self.vy = rnd(10, 20)
         color = self.color = RED
+
+    def move(self):
+        """Переместить цель по прошествии единицы времени."""
+        self.x += self.vx
+        self.y -= self.vy
+        #self.vy -= 0.85
+        if self.y >= 597 - self.r and self.vy < 0:
+            self.vy *= -1
+            self.vx *= 1
+        if self.y <= self.r and self.vy > 0:
+            self.vy *= -1
+            self.vx *= 1
+        if self.x >= 800 - self.r and self.vx > 0:
+            self.vx *= -1
+            self.vy *= 1
+        if self.x <= self.r and self.vx < 0:
+            self.vx *= -1
+            self.vy *= 1
 
     def hit(self, points=1):
         """Попадание шарика в цель."""
@@ -176,6 +204,13 @@ class Target:
             self.color,
             (self.x, self.y),
             self.r
+        )
+        pygame.draw.circle(
+            self.screen,
+            BLACK,
+            (self.x, self.y),
+            self.r,
+            2
         )
 
 
@@ -192,7 +227,8 @@ Text = topic
 clock = pygame.time.Clock()
 gun = Gun(screen)
 target = []
-target += [Target(screen)]
+for i in range(2):
+    target += [Target(screen)]
 finished = False
 point = 0
 
@@ -201,13 +237,18 @@ while not finished:
     Points = str(point)
     for t in target:
         t.draw()
+        t.move()
     textsurface = myfont.render(Points, False, (0, 0, 0))
+    point = 0
     screen.blit(textsurface, (10, 10))
+
     gun.draw()
+
     for b in balls:
         if b.live < 0:
             balls.remove(b)
         b.draw()
+        b.move()
     pygame.display.update()
 
     clock.tick(FPS)
@@ -221,13 +262,12 @@ while not finished:
         elif event.type == pygame.MOUSEMOTION:
             gun.targetting(event)
 
-    for b in balls:
-        b.move()
-        for t in target:
+    for t in target:
+        for b in balls:
             if b.hittest(t) and t.live:
                 t.hit()
                 t.new_target()
-                point += t.points
+        point += t.points
 
     gun.power_up()
 
