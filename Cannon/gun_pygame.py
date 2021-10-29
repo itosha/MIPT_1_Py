@@ -89,12 +89,12 @@ class Ball:
 
 
 class Gun:
-    def __init__(self, screen: pygame.Surface):
+    def __init__(self, screen: pygame.Surface, x=20, y=450):
         self.screen = screen
         self.f2_power = 10
         self.f2_on = 0
-        self.x = 100
-        self.y = 450
+        self.x = x
+        self.y = y
         self.an = 1
         self.color = GREY
 
@@ -107,16 +107,14 @@ class Gun:
         Происходит при отпускании кнопки мыши.
         Начальные значения компонент скорости мяча vx и vy зависят от положения мыши.
         """
-        global balls, bullet
-        bullet += 1
         new_ball = Ball(self.screen, self.x, self.y)
         new_ball.r += 5
         self.an = math.atan2((event.pos[1]-new_ball.y), (event.pos[0]-new_ball.x))
         new_ball.vx = self.f2_power * math.cos(self.an)
         new_ball.vy = - self.f2_power * math.sin(self.an)
-        balls.append(new_ball)
         self.f2_on = 0
         self.f2_power = 10
+        return new_ball
 
     def targetting(self, event):
         """Прицеливание. Зависит от положения мыши."""
@@ -258,7 +256,8 @@ while not finished:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             gun.fire2_start(event)
         elif event.type == pygame.MOUSEBUTTONUP:
-            gun.fire2_end(event)
+            balls.append(gun.fire2_end(event))
+            bullet += 1
         elif event.type == pygame.MOUSEMOTION:
             gun.targetting(event)
 
