@@ -82,7 +82,68 @@ class Ball:
             Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
         """
         distans = (self.x - obj.x) ** 2 + (self.y - obj.y) ** 2
-        if distans > (self.r + obj.r) ** 2:
+        if obj.time_space > 0:
+            return False
+        elif distans > (self.r + obj.r) ** 2:
+            return False
+        else:
+            return True
+
+
+class Roket:
+    def __init__(self, screen: pygame.Surface, x=40, y=450):
+        self.screen = screen
+        self.x = x
+        self.y = y
+        self.r = 10
+        self.R = 80
+        self.vx = 0
+        self.vy = 0
+        self.color = choice(GAME_COLORS_for_ball)
+        self.live = 30
+
+    def move(self):
+
+        self.x += self.vx
+        self.y -= self.vy
+        self.vy -= 0.85
+        if self.y >= 597 - self.r and self.vy < 0:
+            self.vy *= -0.6
+            self.vx *= 0.8
+        if self.y <= self.r and self.vy > 0:
+            self.vy *= -0.6
+            self.vx *= 0.8
+        if self.x >= 800 - self.r and self.vx > 0:
+            self.vx *= -0.6
+            self.vy *= 0.8
+        if self.x <= self.r and self.vx < 0:
+            self.vx *= -0.6
+            self.vy *= 0.8
+        if abs(self.vx) < 0.85 and abs(self.vy) < 0.85:
+            self.vx = 0
+            self.vy = 0
+            self.live -= 1
+
+    def draw(self):
+        pygame.draw.circle(
+            self.screen,
+            self.color,
+            (self.x, self.y),
+            self.r
+        )
+
+    def hittest(self, obj):
+        """Функция проверяет сталкивалкивается ли данный обьект с целью, описываемой в обьекте obj.
+
+        Args:
+            obj: Обьект, с которым проверяется столкновение.
+        Returns:
+            Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
+        """
+        distans = (self.x - obj.x) ** 2 + (self.y - obj.y) ** 2
+        if obj.time_space > 0:
+            return False
+        elif distans > (self.r + obj.r) ** 2:
             return False
         else:
             return True
@@ -98,10 +159,10 @@ class Gun:
         self.an = 1
         self.color = GREY
 
-    def fire2_start(self, event):
+    def fire_ball_start(self, event):
         self.f2_on = 1
 
-    def fire2_end(self, event):
+    def fire_ball_end(self, event):
         """Выстрел мячом.
 
         Происходит при отпускании кнопки мыши.
@@ -134,7 +195,7 @@ class Gun:
         else:
             self.color = BLACK
 
-        #print(math.degrees(self.an))
+        # print(math.degrees(self.an))
 
     def power_up(self):
         if self.f2_on:
@@ -153,7 +214,8 @@ class Gun:
                             self.color,
                             ((x, y),
                              (x + l * math.cos(self.an), y - l * math.sin(-self.an)),
-                             (x + l * math.cos(-self.an) - h * math.sin(-self.an), y - l * math.sin(-self.an) - h * math.cos(-self.an)),
+                             (x + l * math.cos(-self.an) - h * math.sin(-self.an),
+                              y - l * math.sin(-self.an) - h * math.cos(-self.an)),
                              (x - h * math.sin(-self.an), y - h * math.cos(-self.an)),
                              (x, y)))
 
@@ -162,17 +224,18 @@ class Target:
     def __init__(self, screen: pygame.Surface):
         self.screen = screen
         self.points = 0
+        self.time_space = 0
         self.live = 1
         self.new_target()
 
     def new_target(self):
         """ Инициализация новой цели. """
-        x = self.x = rnd(600, 780)
-        y = self.y = rnd(300, 550)
-        r = self.r = rnd(2, 50)
+        self.x = rnd(600, 780)
+        self.y = rnd(300, 550)
+        self.r = rnd(30, 40)
         self.vx = 0
         self.vy = rnd(10, 20)
-        color = self.color = RED
+        self.color = RED
 
     def move(self):
         """Переместить цель по прошествии единицы времени."""
@@ -195,21 +258,75 @@ class Target:
     def hit(self, points=1):
         """Попадание шарика в цель."""
         self.points += points
+        self.time_space = 40
+
 
     def draw(self):
-        pygame.draw.circle(
-            self.screen,
-            self.color,
-            (self.x, self.y),
-            self.r
-        )
-        pygame.draw.circle(
-            self.screen,
-            BLACK,
-            (self.x, self.y),
-            self.r,
-            2
-        )
+        if self.time_space > 0:
+            self.time_space -= 1
+        else:
+            pygame.draw.circle(
+                self.screen,
+                self.color,
+                (self.x, self.y),
+                self.r
+            )
+            pygame.draw.circle(
+                self.screen,
+                BLACK,
+                (self.x, self.y),
+                self.r,
+                2
+            )
+
+
+class Bomb:
+    def __init__(self, screen: pygame.Surface):
+        self.screen = screen
+        self.points = 0
+        self.live = 1
+        self.time_space = 0
+        self.new_target()
+
+    def new_target(self):
+        """ Инициализация новой цели. """
+        self.x = rnd(600, 780)
+        self.y = rnd(300, 550)
+        self.r = rnd(40, 45)
+        self.vx = 0
+        self.vy = 0
+        self.color = BLACK
+
+    def move(self):
+        """Переместить цель по прошествии единицы времени."""
+        self.x += self.vx
+        self.y -= self.vy
+        #self.vy -= 0.85
+        if self.y >= 597 - self.r and self.vy < 0:
+            self.vy *= -1
+            self.vx *= 1
+        if self.y <= self.r and self.vy > 0:
+            self.vy *= -1
+            self.vx *= 1
+        if self.x >= 800 - self.r and self.vx > 0:
+            self.vx *= -1
+            self.vy *= 1
+        if self.x <= self.r and self.vx < 0:
+            self.vx *= -1
+            self.vy *= 1
+
+    def hit(self, points=1):
+        """Попадание шарика в цель."""
+        self.points -= points
+        self.time_space = 40
+
+    def draw(self):
+        if self.time_space > 0:
+            self.time_space -= 1
+        else:
+            bomb = pygame.image.load('Bomb2.bmp')
+            bomb = pygame.transform.scale(bomb, (2*self.r, 2*self.r))
+            screen.blit(bomb, (self.x - self.r, self.y - self.r))
 
 
 pygame.init()
@@ -225,8 +342,8 @@ Text = topic
 clock = pygame.time.Clock()
 gun = Gun(screen)
 target = []
-for i in range(2):
-    target += [Target(screen)]
+target += [Target(screen)]
+target += [Bomb(screen)]
 finished = False
 point = 0
 
@@ -253,14 +370,15 @@ while not finished:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             finished = True
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            gun.fire2_start(event)
-        elif event.type == pygame.MOUSEBUTTONUP:
-            balls.append(gun.fire2_end(event))
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            gun.fire_ball_start(event)
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+            balls.append(gun.fire_ball_end(event))
             bullet += 1
         elif event.type == pygame.MOUSEMOTION:
             gun.targetting(event)
 
+    point = 0
     for t in target:
         for b in balls:
             if b.hittest(t) and t.live:
