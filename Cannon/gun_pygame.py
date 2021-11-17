@@ -95,11 +95,11 @@ class Ball:
 
 
 class Roket:
-    def __init__(self, screen: pygame.Surface, x=40, y=450, v=20):
+    def __init__(self, screen: pygame.Surface, x=40, y=450, angle=math.radians(0), v=20):
         self.screen = screen
         self.x = x
         self.y = y
-        self.angle = math.radians(20)
+        self.angle = angle
         self.s = 78
         self.h = 22
         self.R = 80
@@ -186,6 +186,9 @@ class Gun:
     def fire_ball_start(self, event):
         self.f2_on = 1
 
+    def fire_rocket_start(self, event):
+        self.f2_on = 1
+
     def fire_ball_end(self, event):
         """Выстрел мячом.
 
@@ -200,6 +203,18 @@ class Gun:
         self.f2_on = 0
         self.f2_power = 10
         return new_ball
+
+    def fire_rocket_end(self, event):
+        """Выстрел мячом.
+
+        Происходит при отпускании кнопки мыши.
+        Начальные значения компонент скорости мяча vx и vy зависят от положения мыши.
+        """
+        self.an = -math.atan2((event.pos[1]-self.y), (event.pos[0]-self.x))
+        new_rocket = Roket(self.screen, self.x, self.y, self.an)
+        self.f2_on = 0
+        self.f2_power = 10
+        return new_rocket
 
     def targetting(self, event):
         """Прицеливание. Зависит от положения мыши."""
@@ -394,6 +409,11 @@ while not finished:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             finished = True
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
+            gun.fire_rocket_start(event)
+        elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
+            balls.append(gun.fire_rocket_end(event))
+            bullet += 1
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             gun.fire_ball_start(event)
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
