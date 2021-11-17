@@ -1,4 +1,5 @@
 import math
+import time
 from random import randrange as rnd, choice
 
 import pygame
@@ -89,48 +90,68 @@ class Ball:
         else:
             return True
 
+    def destruction(self):
+        ...
+
 
 class Roket:
-    def __init__(self, screen: pygame.Surface, x=40, y=450):
+    def __init__(self, screen: pygame.Surface, x=40, y=450, v=20):
         self.screen = screen
         self.x = x
         self.y = y
-        self.r = 10
+        self.angle = math.radians(20)
+        self.s = 78
+        self.h = 22
         self.R = 80
-        self.vx = 0
-        self.vy = 0
-        self.color = choice(GAME_COLORS_for_ball)
-        self.live = 30
+        self.vx = v * math.cos(self.angle)
+        self.vy = v * math.sin(self.angle)
+        self.live = 1
 
     def move(self):
 
         self.x += self.vx
         self.y -= self.vy
-        self.vy -= 0.85
-        if self.y >= 597 - self.r and self.vy < 0:
-            self.vy *= -0.6
-            self.vx *= 0.8
-        if self.y <= self.r and self.vy > 0:
-            self.vy *= -0.6
-            self.vx *= 0.8
-        if self.x >= 800 - self.r and self.vx > 0:
-            self.vx *= -0.6
-            self.vy *= 0.8
-        if self.x <= self.r and self.vx < 0:
-            self.vx *= -0.6
-            self.vy *= 0.8
-        if abs(self.vx) < 0.85 and abs(self.vy) < 0.85:
-            self.vx = 0
-            self.vy = 0
+        if self.y >= HEIGHT - 3 and self.vy < 0:
+            self.vy *= -1
+            self.vx *= 1
+            self.angle *= -1
+            self.live -= 1
+        if self.y <= 0 and self.vy >  0:
+            self.vy *= -1
+            self.vx *= 1
+            self.angle *= -1
+            self.live -= 1
+        if self.x >= WIDTH and self.vx > 0:
+            self.vx *= -1
+            self.vy *= 1
+            self.angle = math.radians(180) - self.angle
+            self.live -= 1
+        if self.x <= 0 and self.vx < 0:
+            self.vx *= -1
+            self.vy *= 1
+            self.angle = math.radians(180) - self.angle
             self.live -= 1
 
     def draw(self):
-        pygame.draw.circle(
-            self.screen,
-            self.color,
-            (self.x, self.y),
-            self.r
-        )
+        roket = pygame.image.load('Roket.bmp')
+        roket = pygame.transform.scale(roket, (self.s, self.h))
+        roket = pygame.transform.rotate(roket, math.degrees(self.angle))
+        self.screen.blit(roket, (self.x, self.y))
+
+    def detonation(self):
+        detonation = pygame.image.load('detonation.bmp')
+        detonation = pygame.transform.scale(detonation, (int(0.5 * self.R), int(0.5 * self.R)))
+        self.screen.blit(detonation, (self.x, self.y))
+        pygame.display.update()
+        time.sleep(1)
+        detonation = pygame.transform.scale(detonation, (int(self.R), int(self.R)))
+        self.screen.blit(detonation, (self.x, self.y))
+        pygame.display.update()
+        time.sleep(1)
+        detonation = pygame.transform.scale(detonation, (int(2 * self.R), int(2 * self.R)))
+        self.screen.blit(detonation, (self.x, self.y))
+        pygame.display.update()
+        time.sleep(1)
 
     def hittest(self, obj):
         """Функция проверяет сталкивалкивается ли данный обьект с целью, описываемой в обьекте obj.
@@ -143,10 +164,13 @@ class Roket:
         distans = (self.x - obj.x) ** 2 + (self.y - obj.y) ** 2
         if obj.time_space > 0:
             return False
-        elif distans > (self.r + obj.r) ** 2:
+        elif distans > obj.r ** 2:
             return False
         else:
             return True
+
+    def destruction(self):
+        self.detonation()
 
 
 class Gun:
@@ -260,7 +284,6 @@ class Target:
         self.points += points
         self.time_space = 40
 
-
     def draw(self):
         if self.time_space > 0:
             self.time_space -= 1
@@ -295,7 +318,6 @@ class Bomb:
         self.r = rnd(40, 45)
         self.vx = 0
         self.vy = 0
-        self.color = BLACK
 
     def move(self):
         """Переместить цель по прошествии единицы времени."""
@@ -326,13 +348,14 @@ class Bomb:
         else:
             bomb = pygame.image.load('Bomb2.bmp')
             bomb = pygame.transform.scale(bomb, (2*self.r, 2*self.r))
-            screen.blit(bomb, (self.x - self.r, self.y - self.r))
+            self.screen.blit(bomb, (self.x - self.r, self.y - self.r))
 
 
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 bullet = 0
 balls = []
+balls += [Roket(screen)]
 
 pygame.font.init()
 myfont = pygame.font.SysFont('Comic Sans MS', 20)
@@ -361,6 +384,7 @@ while not finished:
 
     for b in balls:
         if b.live < 0:
+            b.destruction()
             balls.remove(b)
         b.draw()
         b.move()
