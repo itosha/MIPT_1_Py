@@ -108,7 +108,6 @@ class Roket:
         self.live = 1
 
     def move(self):
-
         self.x += self.vx
         self.y -= self.vy
         if self.y >= HEIGHT - 3 and self.vy < 0:
@@ -133,23 +132,26 @@ class Roket:
             self.live -= 1
 
     def draw(self):
-        roket = pygame.image.load('Roket.bmp')
-        roket = pygame.transform.scale(roket, (self.s, self.h))
-        roket = pygame.transform.rotate(roket, math.degrees(self.angle))
-        self.screen.blit(roket, (self.x, self.y))
+        rocket = pygame.image.load('Roket.bmp')
+        rocket = pygame.transform.scale(rocket, (self.s, self.h))
+        rocket = pygame.transform.rotate(rocket, math.degrees(self.angle))
+        self.screen.blit(rocket, (self.x, self.y))
 
     def detonation(self):
         detonation = pygame.image.load('detonation.bmp')
+        r = (self.s ** 2 + self.h ** 2 / 4) ** 0.5
+        x0 = math.cos(self.angle) * r + self.x
+        y0 = math.sin(-self.angle) * r + self.y
         detonation = pygame.transform.scale(detonation, (int(0.5 * self.R), int(0.5 * self.R)))
-        self.screen.blit(detonation, (self.x, self.y))
+        self.screen.blit(detonation, (x0 - 0.25 * self.R, y0 - 0.25 * self.R))
         pygame.display.update()
         time.sleep(1)
         detonation = pygame.transform.scale(detonation, (int(self.R), int(self.R)))
-        self.screen.blit(detonation, (self.x, self.y))
+        self.screen.blit(detonation, (x0 - 0.5 * self.R, y0 - 0.5 * self.R))
         pygame.display.update()
         time.sleep(1)
         detonation = pygame.transform.scale(detonation, (int(2 * self.R), int(2 * self.R)))
-        self.screen.blit(detonation, (self.x, self.y))
+        self.screen.blit(detonation, (x0 - self.R, y0 - self.R))
         pygame.display.update()
         time.sleep(1)
 
@@ -161,7 +163,10 @@ class Roket:
         Returns:
             Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
         """
-        distans = (self.x - obj.x) ** 2 + (self.y - obj.y) ** 2
+        r = (self.s ** 2 + self.h ** 2 / 4) ** 0.5
+        x0 = math.cos(self.angle) * r + self.x
+        y0 = math.sin(-self.angle) * r + self.y
+        distans = (x0 - obj.x) ** 2 + (y0 - obj.y) ** 2
         if obj.time_space > 0:
             return False
         elif distans > obj.r ** 2:
@@ -215,6 +220,10 @@ class Gun:
         self.f2_on = 0
         self.f2_power = 10
         return new_rocket
+
+    def refresh(self):
+        self.f2_on = 0
+        self.f2_power = 10
 
     def targetting(self, event):
         """Прицеливание. Зависит от положения мыши."""
@@ -412,8 +421,12 @@ while not finished:
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
             gun.fire_rocket_start(event)
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
-            balls.append(gun.fire_rocket_end(event))
-            bullet += 1
+            if gun.f2_power > 80:
+                balls.append(gun.fire_rocket_end(event))
+                bullet += 1
+            else:
+                gun.f2_on = 0
+                gun.f2_power = 10
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             gun.fire_ball_start(event)
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
