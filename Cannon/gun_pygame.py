@@ -25,7 +25,7 @@ HEIGHT = 600
 
 
 class Ball:
-    def __init__(self, screen: pygame.Surface, x=40, y=450):
+    def __init__(self, screen: pygame.Surface, kind, x=40, y=450):
         """ Конструктор класса ball
 
         Args:
@@ -35,6 +35,7 @@ class Ball:
         self.screen = screen
         self.x = x
         self.y = y
+        self.kind = kind
         self.r = 10
         self.vx = 0
         self.vy = 0
@@ -290,7 +291,7 @@ class Gun:
         else:
             self.color = BLACK
 
-    def draw(self):
+    def draw_gun(self):
         x = self.x
         y = self.y
         l = max(self.f2_power, 20)
@@ -340,7 +341,7 @@ class Track:
         self.vx = 0
         self.vy = 0
 
-    def draw(self):
+    def draw_track(self):
         x = self.x
         y = self.y
         a = self.a
@@ -481,14 +482,17 @@ topic = "Name: "
 Text = topic
 
 clock = pygame.time.Clock()
-gun = Gun(screen)
-track = Track(screen)
+tank = Tank(screen)
+tank_enemy = Tank(screen, 400, 400)
+tank_enemy1 = Tank(screen, 500, 200)
 target = []
 target += [Target(screen)]
 target += [Bomb(screen)]
 finished = False
 point = 0
-
+enemy = []
+enemy += [tank_enemy]
+enemy += [tank_enemy1]
 while not finished:
     screen.fill(WHITE)
     Points = str(point)
@@ -499,12 +503,12 @@ while not finished:
     point = 0
     screen.blit(textsurface, (10, 10))
 
-    gun.draw()
-    track.move()
-    gun.x = track.x
-    gun.y = track.y
-    track.draw()
-    gun.draw()
+    tank.move()
+    tank.draw_track()
+    tank.draw_gun()
+    for t in enemy:
+        t.draw_track()
+        t.draw_gun()
     for b in balls:
         if b.live <= 0:
             b.destruction()
@@ -521,25 +525,25 @@ while not finished:
         if event.type == pygame.QUIT:
             finished = True
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:
-            gun.fire_rocket_start(event)
+            tank.fire_rocket_start(event)
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 3:
-            if gun.f2_power > 80:
-                balls.append(gun.fire_rocket_end(event))
+            if tank.f2_power > 80:
+                balls.append(tank.fire_rocket_end(event))
                 bullet += 1
             else:
-                gun.f2_on = 0
-                gun.f2_power = 10
+                tank.f2_on = 0
+                tank.f2_power = 10
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-            gun.fire_ball_start(event)
+            tank.fire_ball_start(event)
         elif event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-            balls.append(gun.fire_ball_end(event))
+            balls.append(tank.fire_ball_end(event))
             bullet += 1
         elif event.type == pygame.MOUSEMOTION:
-            gun.targetting(event)
+            tank.targetting(event)
         elif event.type == pygame.KEYDOWN:
-            track.start_move(event)
+            tank.start_move(event)
         elif event.type == pygame.KEYUP:
-            track.end_move()
+            tank.end_move()
 
     point = 0
     for t in target:
@@ -549,7 +553,35 @@ while not finished:
                 t.new_target()
         point += t.points
 
-    gun.power_up()
+    for t in enemy:
+        for b in balls:
+            if b.hittest(t) and t.live > 0:
+                b.destruction()
+                balls.remove(b)
+                b.draw()
+    tank.power_up()
+    for t in enemy:
+        t.targetting_hero(tank.x, tank.y)
+        now = pygame.time.get_ticks()
+        if now - t.last_fire > 6000:
+            balls.append(t.fire_emeny_rocket_end(tank.y, tank.x))
+            t.last_fire = now
+        if t.live <= 0:
+            enemy.remove(t)
+
+    for b in balls:
+        if b.hittest(tank) and tank.live > 0:
+            b.destruction()
+            balls.remove(b)
+            b.draw()
+
+    if tank.live <= 0:
+        finished = True
+        textsurface = myfont.render('GAME OVER', False, (0, 0, 0))
+        screen.blit(textsurface, (100, 100))
+        pygame.display.update()
+        time.sleep(4)
+
 
 
 pygame.quit()
