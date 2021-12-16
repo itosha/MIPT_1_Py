@@ -85,11 +85,12 @@ class Ball:
             Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
         """
         distans = (self.x - obj.x) ** 2 + (self.y - obj.y) ** 2
-        if obj.time_space > 0:
+        if obj.time_space > 0 or (self.kind is obj):
             return False
         elif distans > (self.r + obj.r) ** 2:
             return False
         else:
+            obj.live -= 1
             return True
 
     def destruction(self):
@@ -97,10 +98,12 @@ class Ball:
 
 
 class Roket:
-    def __init__(self, screen: pygame.Surface, x=40, y=450, angle=math.radians(0), v=20):
+    def __init__(self, screen: pygame.Surface, kind, x=40, y=450, angle=math.radians(0), v=20):
         self.screen = screen
         self.x = x
         self.y = y
+        self.kind = kind
+        print(self.kind)
         self.angle = angle
         self.s = 78
         self.h = 22
@@ -108,6 +111,8 @@ class Roket:
         self.vx = v * math.cos(self.angle)
         self.vy = v * math.sin(self.angle)
         self.live = 1
+        self.rocket = pygame.Surface((20, 20))
+        self.rect = self.rocket.get_rect()
 
     def move(self):
         self.x += self.vx
@@ -134,10 +139,12 @@ class Roket:
             self.live -= 1
 
     def draw(self):
-        rocket = pygame.image.load('Roket.bmp')
-        rocket = pygame.transform.scale(rocket, (self.s, self.h))
-        rocket = pygame.transform.rotate(rocket, math.degrees(self.angle))
-        self.screen.blit(rocket, (self.x, self.y))
+        self.rocket = pygame.image.load('Roket.bmp')
+        self.rocket = pygame.transform.scale(self.rocket, (self.s, self.h))
+        self.rocket = pygame.transform.rotate(self.rocket, math.degrees(self.angle))
+        self.rect = self.rocket.get_rect()
+        self.rect.topleft = (self.x, self.y)
+        self.screen.blit(self.rocket, (self.x, self.y))
 
     def detonation(self):
         detonation = pygame.image.load('detonation.bmp')
@@ -165,16 +172,17 @@ class Roket:
         Returns:
             Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
         """
-        r = (self.s ** 2 + self.h ** 2 / 4) ** 0.5
-        x0 = math.cos(self.angle) * r + self.x
-        y0 = math.sin(-self.angle) * r + self.y
+        x = self.rect.center
+        x0 = x[0]
+        y0 = x[1]
         distans = (x0 - obj.x) ** 2 + (y0 - obj.y) ** 2
-        if obj.time_space > 0:
+        if obj.time_space > 0 or (self.kind is obj):
             return False
         elif distans > obj.r ** 2:
             return False
         else:
             self.live -= 1
+            obj.live -= 3
             return True
 
     def destruction(self):
