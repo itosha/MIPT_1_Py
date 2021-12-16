@@ -30,6 +30,7 @@ class Ball:
         Args:
         x - начальное положение мяча по горизонтали
         y - начальное положение мяча по вертикали
+        kind - объект выпустивший снаряд
         """
         self.screen = screen
         self.x = x
@@ -99,6 +100,15 @@ class Ball:
 
 class Roket(pygame.sprite.Sprite):
     def __init__(self, screen: pygame.Surface, kind, x=40, y=450, angle=math.radians(0), v=20):
+        """
+        Конструктор
+        :param screen:
+        :param kind: объект выстелевший
+        :param x: начальное положение
+        :param y: начальное положение
+        :param angle: угол полета
+        :param v: скорость
+        """
         pygame.sprite.Sprite.__init__(self)
         self.screen = screen
         self.x = x
@@ -116,6 +126,9 @@ class Roket(pygame.sprite.Sprite):
         self.rect = self.rocket.get_rect()
 
     def move(self):
+        """
+        прередвигает рокеты в соответствие со скоростью и взрывает при попадание в стену
+        """
         self.x += self.vx
         self.y -= self.vy
         if self.y >= HEIGHT - 3 and self.vy < 0:
@@ -148,6 +161,11 @@ class Roket(pygame.sprite.Sprite):
         self.screen.blit(self.rocket, (self.x, self.y))
 
     def detonation(self):
+        """
+        прокручивает анимацию взырыва
+        сделано на коленке
+        когда писал еще не работал над проектом
+        """
         detonation = pygame.image.load('detonation.bmp')
         r = (self.s ** 2 + self.h ** 2 / 4) ** 0.5
         x0 = math.cos(self.angle) * r + self.x
@@ -173,9 +191,6 @@ class Roket(pygame.sprite.Sprite):
         Returns:
             Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
         """
-        '''r = (self.s ** 2 + self.h ** 2 / 4) ** 0.5
-        x0 = math.cos(self.angle) * r + self.x
-        y0 = math.sin(-self.angle) * r + self.y'''
         x = self.rect.center
         x0 = x[0]
         y0 = x[1]
@@ -195,6 +210,12 @@ class Roket(pygame.sprite.Sprite):
 
 class Gun:
     def __init__(self, screen: pygame.Surface, x=20, y=450):
+        """
+        Конструктор
+        :param screen:
+        :param x: начальное положение
+        :param y: начальное положение
+        """
         self.screen = screen
         self.f2_power = 10
         self.f2_on = 0
@@ -225,7 +246,7 @@ class Gun:
         return new_ball
 
     def fire_rocket_end(self, event):
-        """Выстрел мячом.
+        """Выстрел рокетой.
 
         Происходит при отпускании кнопки мыши.
         Начальные значения компонент скорости мяча vx и vy зависят от положения мыши.
@@ -237,10 +258,7 @@ class Gun:
         return new_rocket
 
     def fire_emeny_rocket_end(self, y, x):
-        """Выстрел мячом.
-
-        Происходит при отпускании кнопки мыши.
-        Начальные значения компонент скорости мяча vx и vy зависят от положения мыши.
+        """Выстрел рокетой. Функция для выстела бота
         """
         self.an = -math.atan2((y-self.y), (x-self.x))
         new_rocket = Roket(self.screen, self, self.x, self.y, self.an)
@@ -271,6 +289,9 @@ class Gun:
             self.color = BLACK
 
     def targetting_hero(self, x, y):
+        """
+        прицеливание бота в точку x, y
+        """
         if x - self.x == 0:
             if y - self.y > 0:
                 self.an = math.radians(-90)
@@ -311,6 +332,16 @@ class Gun:
 
 class Track:
     def __init__(self, screen: pygame.Surface, v=5, x=20, y=450, width=50, height=40, angle=0):
+        """
+        конструктор
+        :param screen:
+        :param v: скорость движеня полная
+        :param x: начальное положение
+        :param y: начальное положение
+        :param width: ширина
+        :param height: высота
+        :param angle: начальныйугол поворота
+        """
         self.screen = screen
         self.x = x
         self.y = y
@@ -360,6 +391,12 @@ class Track:
 
 class Tank(Track, Gun):
     def __init__(self, screen: pygame.Surface, x=20, y=450):
+        """
+        конструкор танка
+        :param screen:
+        :param x: начальное положение
+        :param y: начальное положение
+        """
         Track.__init__(self, screen, v=5, x=x, y=y, width=50, height=40, angle=0)
         Gun.__init__(self, screen, x=x, y=y)
         self.live = 3
@@ -404,7 +441,7 @@ class Target:
             self.vy *= 1
 
     def hit(self, points=1):
-        """Попадание шарика в цель."""
+        """Попадание снаряда в цель."""
         self.points += points
         self.time_space = 40
 
@@ -463,7 +500,7 @@ class Bomb:
             self.vy *= 1
 
     def hit(self, points=1):
-        """Попадание шарика в цель."""
+        """Попадание снаряда в цель."""
         self.points -= points
         self.time_space = 40
 
