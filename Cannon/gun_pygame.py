@@ -27,7 +27,6 @@ HEIGHT = 600
 class Ball:
     def __init__(self, screen: pygame.Surface, kind, x=40, y=450):
         """ Конструктор класса ball
-
         Args:
         x - начальное положение мяча по горизонтали
         y - начальное положение мяча по вертикали
@@ -98,8 +97,9 @@ class Ball:
         ...
 
 
-class Roket:
+class Roket(pygame.sprite.Sprite):
     def __init__(self, screen: pygame.Surface, kind, x=40, y=450, angle=math.radians(0), v=20):
+        pygame.sprite.Sprite.__init__(self)
         self.screen = screen
         self.x = x
         self.y = y
@@ -173,6 +173,9 @@ class Roket:
         Returns:
             Возвращает True в случае столкновения мяча и цели. В противном случае возвращает False.
         """
+        '''r = (self.s ** 2 + self.h ** 2 / 4) ** 0.5
+        x0 = math.cos(self.angle) * r + self.x
+        y0 = math.sin(-self.angle) * r + self.y'''
         x = self.rect.center
         x0 = x[0]
         y0 = x[1]
@@ -198,7 +201,7 @@ class Gun:
         self.x = x
         self.y = y
         self.an = 1
-        self.color = GREY
+        self.color = BLACK
 
     def fire_ball_start(self, event):
         self.f2_on = 1
@@ -212,7 +215,7 @@ class Gun:
         Происходит при отпускании кнопки мыши.
         Начальные значения компонент скорости мяча vx и vy зависят от положения мыши.
         """
-        new_ball = Ball(self.screen, self.x, self.y)
+        new_ball = Ball(self.screen, self, self.x, self.y)
         new_ball.r += 5
         self.an = math.atan2((event.pos[1]-new_ball.y), (event.pos[0]-new_ball.x))
         new_ball.vx = self.f2_power * math.cos(self.an)
@@ -228,7 +231,7 @@ class Gun:
         Начальные значения компонент скорости мяча vx и vy зависят от положения мыши.
         """
         self.an = -math.atan2((event.pos[1]-self.y), (event.pos[0]-self.x))
-        new_rocket = Roket(self.screen, self.x, self.y, self.an)
+        new_rocket = Roket(self.screen, self, self.x, self.y, self.an)
         self.f2_on = 0
         self.f2_power = 10
         return new_rocket
@@ -319,7 +322,7 @@ class Track:
         self.a = width
         self.b = height
         self.r = 40
-        self.color = GREEN
+        self.color_track = GREEN
 
     def start_move(self, event):
         if event.key == pygame.K_w:
@@ -348,7 +351,7 @@ class Track:
         b = self.b
         angle = math.radians(self.angle)
         pygame.draw.polygon(self.screen,
-                            self.color,
+                            self.color_track,
                             ((x + 0.5*(b*sin(angle)-a*cos(angle)), y + 0.5*(a*sin(angle)+b*cos(angle))),
                              (x - 0.5*(b*sin(angle)+a*cos(angle)), y + 0.5*(a*sin(angle)-b*cos(angle))),
                              (x - 0.5*(b*sin(angle)-a*cos(angle)), y - 0.5*(a*sin(angle)+b*cos(angle))),
@@ -380,6 +383,7 @@ class Target:
         self.vx = 0
         self.vy = rnd(10, 20)
         self.color = RED
+        self.live = 1
 
     def move(self):
         """Переместить цель по прошествии единицы времени."""
@@ -438,6 +442,7 @@ class Bomb:
         self.r = rnd(40, 45)
         self.vx = 0
         self.vy = 0
+        self.live = 1
 
     def move(self):
         """Переместить цель по прошествии единицы времени."""
