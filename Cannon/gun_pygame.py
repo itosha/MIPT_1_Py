@@ -1,5 +1,7 @@
 import math
 import time
+from math import sin as sin
+from math import cos as cos
 from random import randrange as rnd, choice
 
 import pygame
@@ -115,7 +117,7 @@ class Roket:
             self.vx *= 1
             self.angle *= -1
             self.live -= 1
-        if self.y <= 0 and self.vy >  0:
+        if self.y <= 0 and self.vy > 0:
             self.vy *= -1
             self.vx *= 1
             self.angle *= -1
@@ -145,15 +147,15 @@ class Roket:
         detonation = pygame.transform.scale(detonation, (int(0.5 * self.R), int(0.5 * self.R)))
         self.screen.blit(detonation, (x0 - 0.25 * self.R, y0 - 0.25 * self.R))
         pygame.display.update()
-        time.sleep(1)
+        #time.sleep(1)
         detonation = pygame.transform.scale(detonation, (int(self.R), int(self.R)))
         self.screen.blit(detonation, (x0 - 0.5 * self.R, y0 - 0.5 * self.R))
         pygame.display.update()
-        time.sleep(1)
+        #time.sleep(1)
         detonation = pygame.transform.scale(detonation, (int(2 * self.R), int(2 * self.R)))
         self.screen.blit(detonation, (x0 - self.R, y0 - self.R))
         pygame.display.update()
-        time.sleep(1)
+        #time.sleep(1)
 
     def hittest(self, obj):
         """Функция проверяет сталкивалкивается ли данный обьект с целью, описываемой в обьекте obj.
@@ -172,6 +174,7 @@ class Roket:
         elif distans > obj.r ** 2:
             return False
         else:
+            self.live -= 1
             return True
 
     def destruction(self):
@@ -266,6 +269,64 @@ class Gun:
                               y - l * math.sin(-self.an) - h * math.cos(-self.an)),
                              (x - h * math.sin(-self.an), y - h * math.cos(-self.an)),
                              (x, y)))
+
+
+class Track:
+    def __init__(self, screen: pygame.Surface, v=5, x=20, y=450, width=50, height=40, angle=0):
+        self.screen = screen
+        self.x = x
+        self.y = y
+        self.angle = angle
+        self.v = v
+        self.vx = 0
+        self.vy = 0
+        self.movement = 0
+        self.a = width
+        self.b = height
+        self.r = (self.a ** 2 + self.b ** 2) ** 0.5 / 2
+        self.color = GREEN
+
+    def start_move(self, event):
+        if event.key == pygame.K_w:
+            self.angle = 90
+            self.movement = 1
+        if event.key == pygame.K_s:
+            self.angle = -90
+            self.movement = 1
+        self.vx = self.v * math.cos(math.radians(self.angle))
+        self.vy = self.v * math.sin(math.radians(-self.angle))
+
+    def move(self):
+        if self.movement:
+            self.x += self.vx
+            self.y += self.vy
+
+    def end_move(self):
+        self.movement = 0
+        self.vx = 0
+        self.vy = 0
+
+    def draw(self):
+        x = self.x
+        y = self.y
+        a = self.a
+        b = self.b
+        angle = math.radians(self.angle)
+        pygame.draw.polygon(self.screen,
+                            self.color,
+                            ((x + 0.5*(b*sin(angle)-a*cos(angle)), y + 0.5*(a*sin(angle)+b*cos(angle))),
+                             (x - 0.5*(b*sin(angle)+a*cos(angle)), y + 0.5*(a*sin(angle)-b*cos(angle))),
+                             (x - 0.5*(b*sin(angle)-a*cos(angle)), y - 0.5*(a*sin(angle)+b*cos(angle))),
+                             (x + 0.5*(b*sin(angle)+a*cos(angle)), y - 0.5*(a*sin(angle)-b*cos(angle))),))
+
+
+class Tank(Track, Gun):
+    def __init__(self, screen: pygame.Surface, x=20, y=450):
+        Track.__init__(self, screen, v=5, x=x, y=y, width=50, height=40, angle=0)
+        Gun.__init__(self, screen, x=x, y=y)
+        self.live = 3
+        self.time_space = 0
+        self.last_fire = 0
 
 
 class Target:
@@ -379,7 +440,6 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 bullet = 0
 balls = []
-balls += [Roket(screen)]
 
 pygame.font.init()
 myfont = pygame.font.SysFont('Comic Sans MS', 20)
@@ -388,6 +448,7 @@ Text = topic
 
 clock = pygame.time.Clock()
 gun = Gun(screen)
+track = Track(screen)
 target = []
 target += [Target(screen)]
 target += [Bomb(screen)]
@@ -405,13 +466,20 @@ while not finished:
     screen.blit(textsurface, (10, 10))
 
     gun.draw()
-
+    track.move()
+    gun.x = track.x
+    gun.y = track.y
+    track.draw()
+    gun.draw()
     for b in balls:
-        if b.live < 0:
+        if b.live <= 0:
             b.destruction()
             balls.remove(b)
+
+    for b in balls:
         b.draw()
         b.move()
+
     pygame.display.update()
 
     clock.tick(FPS)
@@ -434,6 +502,10 @@ while not finished:
             bullet += 1
         elif event.type == pygame.MOUSEMOTION:
             gun.targetting(event)
+        elif event.type == pygame.KEYDOWN:
+            track.start_move(event)
+        elif event.type == pygame.KEYUP:
+            track.end_move()
 
     point = 0
     for t in target:
