@@ -224,6 +224,18 @@ class Gun:
         self.f2_power = 10
         return new_rocket
 
+    def fire_emeny_rocket_end(self, y, x):
+        """Выстрел мячом.
+
+        Происходит при отпускании кнопки мыши.
+        Начальные значения компонент скорости мяча vx и vy зависят от положения мыши.
+        """
+        self.an = -math.atan2((y-self.y), (x-self.x))
+        new_rocket = Roket(self.screen, self, self.x, self.y, self.an)
+        self.f2_on = 0
+        self.f2_power = 10
+        return new_rocket
+
     def refresh(self):
         self.f2_on = 0
         self.f2_power = 10
@@ -246,7 +258,21 @@ class Gun:
         else:
             self.color = BLACK
 
-        # print(math.degrees(self.an))
+    def targetting_hero(self, x, y):
+        if x - self.x == 0:
+            if y - self.y > 0:
+                self.an = math.radians(-90)
+            else:
+                self.an = math.radians(90)
+        else:
+            if x - self.x > 0:
+                self.an = math.atan((y - self.y) / (x - self.x))
+            else:
+                self.an = math.radians(180) - math.atan((-y + self.y) / (x - self.x))
+        if self.f2_on:
+            self.color = RED
+        else:
+            self.color = BLACK
 
     def power_up(self):
         if self.f2_on:
@@ -283,7 +309,7 @@ class Track:
         self.movement = 0
         self.a = width
         self.b = height
-        self.r = (self.a ** 2 + self.b ** 2) ** 0.5 / 2
+        self.r = 40
         self.color = GREEN
 
     def start_move(self, event):
